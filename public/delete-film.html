@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Chandler Stevens">
+		<title>Delete a Film</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	</head>
+	<body>
+		<div class="container">
+			<h2>Delete a Film by ID</h2>
+			<hr />
+			<div class="form-group">
+				<form>
+					<div class="form-title">
+						<h4>Film ID:</h4>
+					</div>
+					<div class="form-group">
+						<input class="form-control" type="number" value="1" id="filmID" name="filmID" required >
+					</div>
+					<button type="button" class="btn btn-primary" onclick="getFilm()" method="GET">Retrieve</button>
+					<button type="button" class="btn btn-secondary" onclick="clearTable()" method="GET">Reset</button>
+					<button type="button" class="btn btn-danger" onclick="deleteFilm()" method="GET" id="deleteButton" name="deleteButton" disabled>Delete</button>
+				</form>
+			</div>
+			<table class="table table-striped">
+				<thead>
+					<tr id="tblHeader">
+					</tr>
+				</thead>
+				<tbody id="tblBody">
+				</tbody>
+			</table>
+		</div>
+		<script>
+			function getFilm(){
+				let xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function(){
+					if (this.readyState == 4 && this.status == 200){
+						let head = JSON.parse(this.response)[0];
+						let body = JSON.parse(this.response)[1];
+						if (head != "Error"){
+							document.getElementById("deleteButton").disabled = false;
+							document.getElementById("tblHeader").innerHTML = head;
+							document.getElementById("tblBody").innerHTML = body;
+
+						}
+						else {
+							document.getElementById("deleteButton").disabled = true;
+							document.getElementById("tblHeader").innerHTML = "<th scope='col'>Error: The given film ID does not exist.</th>";
+							document.getElementById("tblBody").innerHTML = "";
+						}
+					}
+				};
+				xhttp.open("GET", "api/films/"+document.getElementById("filmID").value, true);
+				xhttp.send();
+			}
+
+			function clearTable(){
+				document.getElementById("filmID").value = "1";
+				document.getElementById("deleteButton").disabled = true;
+				document.getElementById("tblHeader").innerHTML = "";
+				document.getElementById("tblBody").innerHTML = "";
+			}
+
+			function deleteFilm(){
+				let xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function(){
+					if (this.readyState == 4 && this.status == 200){
+						let head = JSON.parse(this.response)[0];
+						let body = JSON.parse(this.response)[1];
+						if (head != "Error"){
+							clearTable();
+						}
+						else {
+							document.getElementById("deleteButton").disabled = true;
+							document.getElementById("tblHeader").innerHTML = "<th scope='col'>Error: Failed to delete film.</th>";
+							document.getElementById("tblBody").innerHTML = "";
+						}
+					}
+				};
+				xhttp.open("DELETE", "api/films", true);
+				xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+				xhttp.send("filmID="+document.getElementById("filmID").value);
+			}
+		</script>
+	</body>
+</html>

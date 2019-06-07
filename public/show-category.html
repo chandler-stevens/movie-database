@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Chandler Stevens">
+		<title>Find a Category</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	</head>
+	<body>
+		<div class="container">
+			<h2>Find a Category by ID</h2>
+			<hr />
+			<div class="form-group">
+				<form>
+					<div class="form-title">
+						<h4>Category ID:</h4>
+					</div>
+					<div class="form-group">
+						<input class="form-control" type="number" value="1" id="categoryID" name="categoryID" required >
+					</div>
+					<button type="button" class="btn btn-primary" onclick="getCategory()" method="GET">Retrieve</button>
+					<button type="button" class="btn btn-secondary" onclick="clearTable()" method="GET">Reset</button>
+				</form>
+			</div>
+			<table class="table table-striped">
+				<thead>
+					<tr id="tblHeader">
+					</tr>
+				</thead>
+				<tbody id="tblBody">
+				</tbody>
+			</table>
+		</div>
+		<script>
+			function getCategory(){
+				let xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function(){
+					if (this.readyState == 4 && this.status == 200){
+						let head = JSON.parse(this.response)[0];
+						let body = JSON.parse(this.response)[1];
+						if (head != "Error"){
+							document.getElementById("tblHeader").innerHTML = head;
+							document.getElementById("tblBody").innerHTML = body;
+						}
+						else {
+							document.getElementById("tblHeader").innerHTML = "<th scope='col'>Error: The given category ID does not exist.</th>";
+							document.getElementById("tblBody").innerHTML = "";
+						}
+					}
+				};
+				xhttp.open("GET", "api/categories/"+document.getElementById("categoryID").value, true);
+				xhttp.send();
+			}
+			function clearTable(){
+				document.getElementById("categoryID").value = "1";
+				document.getElementById("tblHeader").innerHTML = "";
+				document.getElementById("tblBody").innerHTML = "";
+			}
+		</script>
+	</body>
+	</html>

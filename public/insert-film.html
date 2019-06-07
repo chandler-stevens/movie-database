@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Chandler Stevens">
+		<title>Add a Film</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	</head>
+	<body onload="populate()">
+		<div class="container">
+			<h2>Add a Film</h2>
+			<hr />
+			<div class="form-group">
+				<form id="example" action="api/films" method="POST">
+					<div class="form-title">
+						<h4>Film Information (* denotes required field)</h4>
+					</div>
+					<div class="form-group">
+						<label class="field-label" for="title">Title *</label>
+						<input class="form-control" placeholder="Title" type="text" id="title" name="title" required >
+					</div>
+					<div class="form-group">
+						<label class="field-label" for="description">Description *</label>
+						<input class="form-control" placeholder="Description" type="text" id="description" name="description" required >
+					</div>
+					<div class="form-group">
+						<label class="field-label" for="releaseYear">Release Year *</label>
+						<input class="form-control" placeholder="####" type="number" id="releaseYear" name="releaseYear" required >
+						<span class="validity"></span>
+					</div>
+					<div class="form-group">
+						<label class="field-label" for="length">Length in Minutes *</label>
+						<input class="form-control" placeholder="###" type="number" id="length" name="length" required >
+						<span class="validity"></span>
+					</div>
+					<div class="form-group">
+						<label class="field-label" for="rating">Rating</label>
+						<select class="form-control" id="rating" name="rating">
+							<option value="G">G</option>
+							<option value="PG">PG</option>
+							<option value="PG-13">PG-13</option>
+							<option value="R">R</option>
+							<option value="NC-17">NC-17</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label class="field-label" for="categoryID">Category *</label>
+						<select class="form-control" id="categoryID" name="categoryID">
+						</select>
+					</div>
+					<button type="button" class="btn btn-primary" onclick="addFilm()" method="GET">Submit</button>
+					<button type="button" class="btn btn-secondary" onclick="clearTable()" method="GET">Reset</button>
+				</form>
+			</div>
+			<table class="table table-striped">
+				<thead>
+					<tr id="tblHeader">
+					</tr>
+				</thead>
+				<tbody>
+					<tr id="tblBody">
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<script>
+			function addFilm(){
+				let xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function(){
+					if (this.readyState == 4 && this.status == 200){
+						let head = JSON.parse(this.response)[0];
+						let body = JSON.parse(this.response)[1];
+						if (head != "Error"){
+							document.getElementById("tblHeader").innerHTML = head;
+							document.getElementById("tblBody").innerHTML = body;
+						}
+						else {
+							document.getElementById("tblHeader").innerHTML = "<th scope='col'>Error: The film insertion failed.</th>";
+							document.getElementById("tblBody").innerHTML = "";
+						}
+					}
+				};
+				xhttp.open("POST", "api/films", true);
+				xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+				xhttp.send(
+					"title="+document.getElementById("title").value+"&"+
+					"description="+document.getElementById("description").value+"&"+
+					"releaseYear="+document.getElementById("releaseYear").value+"&"+
+					"length="+document.getElementById("length").value+"&"+
+					"rating="+document.getElementById("rating").value+"&"+
+					"categoryID="+document.getElementById("categoryID").value
+				);
+			}
+
+			function clearTable(){
+				document.getElementById("title").value = "";
+				document.getElementById("description").value = "";
+				document.getElementById("releaseYear").value = "";
+				document.getElementById("length").value = "";
+				document.getElementById("rating").value =
+					document.getElementById("rating").firstElementChild.value;
+				document.getElementById("categoryID").value =
+					document.getElementById("categoryID").firstElementChild.value;
+				document.getElementById("tblHeader").innerHTML = "";
+				document.getElementById("tblBody").innerHTML = "";
+			}
+
+			function populate(){
+				let xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function(){
+					if (this.readyState == 4 && this.status == 200){
+						document.getElementById("categoryID").innerHTML = "";
+						let categories = JSON.parse(this.response)[2];
+						let options = '';
+						for (var i = 0; i < categories.length; i+=3){
+							options += '<option value="'+categories[i]+'">'+categories[i+1]+'</option>';
+						}
+						document.getElementById("categoryID").innerHTML = options;
+					}
+				};
+				xhttp.open("GET", "api/categories", true);
+				xhttp.send();
+			}
+		</script>
+	</body>
+</html>
